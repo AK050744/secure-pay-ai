@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Pay AI - Transaction Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+            padding: 20px; 
+            margin: 0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        h1 { 
+            text-align: center; 
+            color: #333;
+            margin-bottom: 30px;
+        }
+        .camera-section {
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+        }
+        video, canvas { 
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .form-section {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+        }
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        .form-row input, .form-row select {
+            flex: 1;
+        }
+        input, select { 
+            width: 100%; 
+            padding: 12px; 
+            margin: 8px 0; 
+            border-radius: 8px; 
+            border: 2px solid #ddd; 
+            font-size: 14px;
+            transition: border-color 0.3s;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+        button { 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white; 
+            padding: 12px 25px; 
+            border: none; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+            margin: 5px;
+        }
+        button:hover { 
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        .submit-btn {
+            width: 100%;
+            padding: 15px;
+            font-size: 18px;
+            margin-top: 20px;
+        }
+        .result { 
+            margin-top: 30px; 
+            text-align: center; 
+            padding: 20px;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .approved { background: #d4edda; color: #155724; border: 2px solid #c3e6cb; }
+        .blocked { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
+        .challenge { background: #fff3cd; color: #856404; border: 2px solid #ffeaa7; }
+        .error { background: #f8d7da; color: #721c24; border: 2px solid #f5c6cb; }
+        .face-captured { 
+            background: #d4edda; 
+            color: #155724; 
+            padding: 10px;
+            border-radius: 5px;
+            margin-top: 10px;
+            display: none;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔒 Secure Pay AI - Transaction Risk Demo</h1>
+
+        <div class="camera-section">
+            <h3>Step 1: Face Verification</h3>
+            <video id="video" width="320" height="240" autoplay></video>
+            <canvas id="canvas" width="320" height="240" style="display:none;"></canvas>
+            <br><br>
+            <button type="button" onclick="captureImage()">📸 Capture Face</button>
+            <button type="button" onclick="testFaceDetection()" style="background: orange;">🔍 Test Face Detection</button>
+            <div class="face-captured" id="faceCaptured">✅ Face image captured successfully!</div>
+        </div>
+
+        <div class="form-section">
+            <h3>Step 2: Transaction Details</h3>
+            <form id="transactionForm">
+                <div class="form-row">
+                    <input type="text" placeholder="Device ID (e.g., DEV12345)" name="device_id" required>
+                    <input type="text" placeholder="Location (e.g., New York, USA)" name="location" required>
+                </div>
+                
+                <div class="form-row">
+                    <input type="number" placeholder="Purchase Amount ($)" name="purchase_amount" step="0.01" required>
+                    <input type="number" placeholder="Account Age (days)" name="account_age_days" required>
+                </div>
+                
+                <div class="form-row">
+                    <input type="text" placeholder="Category (e.g., Electronics)" name="category" required>
+                    <input type="number" placeholder="Session Duration (seconds)" name="session_duration" required>
+                </div>
+
+                <div class="form-row">
+                    <select name="device_id_known">
+                        <option value="true">Known Device</option>
+                        <option value="false">Unknown Device</option>
+                    </select>
+                    <select name="location_change">
+                        <option value="false">Same Location</option>
+                        <option value="true">Different Location</option>
+                    </select>
+                </div>
+
+                <div class="form-row">
+                    <select name="purchase_hour">
+                        <option value="12">Daytime (12 PM)</option>
+                        <option value="15">Afternoon (3 PM)</option>
+                        <option value="20">Evening (8 PM)</option>
+                        <option value="2">Late Night (2 AM)</option>
+                    </select>
+                    <select name="is_sale_event">
+                        <option value="false">Regular Purchase</option>
+                        <option value="true">Sale Event</option>
+                    </select>
+                </div>
+
+                <input type="hidden" id="faceImage" name="face_image">
+                <button type="submit" class="submit-btn">🔍 Analyze Transaction Risk</button>
+            </form>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Analyzing transaction risk...</p>
+        </div>
+
+        <div class="result" id="result"></div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const context = canvas.getContext('2d');
+        let faceImageCaptured = false;
+
+        // Start camera on load
+        navigator.mediaDevices.getUserMedia({ video: true })
+            .then(stream => {
+                video.srcObject = stream;
+                console.log('Camera started successfully');
+            })
+            .catch(err => {
+                console.error('Error accessing camera:', err);
+                alert("Error accessing camera: " + err.message + "\nPlease ensure you have granted camera permissions.");
+            });
+
+        function captureImage() {
+            if (video.videoWidth === 0 || video.videoHeight === 0) {
+                alert("Please wait for camera to initialize");
+                return;
+            }
+
+            // Ensure we have a good quality capture
+            const canvasWidth = video.videoWidth;
+            const canvasHeight = video.videoHeight;
+            
+            // Resize canvas to match video dimensions for better quality
+            canvas.width = canvasWidth;
+            canvas.height = canvasHeight;
+            
+            context.drawImage(video, 0, 0, canvasWidth, canvasHeight);
+            
+            // Capture with higher quality
+            const imageData = canvas.toDataURL('image/jpeg', 0.9);
+            document.getElementById('faceImage').value = imageData;
+            document.getElementById('faceCaptured').style.display = 'block';
+            faceImageCaptured = true;
+            
+            console.log('Face image captured');
+            console.log('Image data length:', imageData.length);
+            console.log('Canvas dimensions:', canvasWidth, 'x', canvasHeight);
+        }
+
+        document.getElementById('transactionForm').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            if (!faceImageCaptured) {
+                alert("Please capture your face image first!");
+                return;
+            }
+
+            // Show loading
+            document.getElementById('loading').style.display = 'block';
+            document.getElementById('result').innerHTML = '';
+
+            try {
+                const formData = new FormData(this);
+                const jsonData = {};
+                
+                formData.forEach((value, key) => {
+                    if (key === 'purchase_amount' || key === 'account_age_days' || key === 'session_duration' || key === 'purchase_hour') {
+                        jsonData[key] = parseFloat(value);
+                    } else if (key === 'device_id_known' || key === 'location_change' || key === 'is_sale_event') {
+                        jsonData[key] = value === 'true';
+                    } else {
+                        jsonData[key] = value;
+                    }
+                });
+
+                console.log('Sending transaction data:', jsonData);
+
+                const response = await fetch("http://127.0.0.1:8000/verify_transaction/", {
+                    method: "POST",
+                    headers: { 
+                        "Content-Type": "application/json",
+                        "Accept": "application/json"
+                    },
+                    body: JSON.stringify(jsonData),
+                    mode: 'cors'
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const result = await response.json();
+                console.log('Transaction result:', result);
+
+                // Hide loading
+                document.getElementById('loading').style.display = 'none';
+
+                // Show result with appropriate styling
+                let resultClass = '';
+                let resultIcon = '';
+                
+                switch(result.status) {
+                    case 'approved':
+                        resultClass = 'approved';
+                        resultIcon = '✅';
+                        break;
+                    case 'blocked':
+                        resultClass = 'blocked';
+                        resultIcon = '❌';
+                        break;
+                    case 'challenge':
+                        resultClass = 'challenge';
+                        resultIcon = '⚠️';
+                        break;
+                    default:
+                        resultClass = 'error';
+                        resultIcon = '❌';
+                }
+
+                document.getElementById('result').innerHTML = `
+                    <div class="${resultClass}">
+                        <h3>${resultIcon} Status: ${result.status.toUpperCase()}</h3>
+                        <p><strong>Risk Score:</strong> ${result.score}/100</p>
+                        <p><strong>Message:</strong> ${result.message}</p>
+                    </div>
+                `;
+
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('result').innerHTML = `
+                    <div class="error">
+                        <h3>❌ Error</h3>
+                        <p>Failed to process transaction: ${error.message}</p>
+                        <p>Please ensure the backend server is running on http://127.0.0.1:8000</p>
+                    </div>
+                `;
+            }
+        });
+
+        // Test face detection separately
+        async function testFaceDetection() {
+            if (!faceImageCaptured) {
+                alert("Please capture face image first!");
+                return;
+            }
+            
+            try {
+                const response = await fetch("http://127.0.0.1:8000/debug_face/", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        face_image: document.getElementById('faceImage').value
+                    }),
+                    mode: 'cors'
+                });
+                
+                const result = await response.json();
+                console.log("Face detection test result:", result);
+                alert(`Face Detection Test:\nFace Detected: ${result.face_detected}\nImage Length: ${result.image_data_length}\nOpenCV Version: ${result.opencv_version || 'Unknown'}`);
+            } catch (error) {
+                console.error('Face detection test error:', error);
+                alert('Face detection test failed: ' + error.message);
+            }
+        }
+
+        // Hide canvas initially
+        document.getElementById('canvas').style.display = 'none';
+    </script>
+</body>
+</html>
