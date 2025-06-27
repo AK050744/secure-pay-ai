@@ -1,4 +1,4 @@
-# secure-pay-ai
+# Secure-pay-ai
 Secure Pay AI is an advanced fraud detection system that combines machine learning, computer vision, and behavioral analysis to provide real-time transaction risk assessment for retail environments. Our solution uses facial verification and multi-factor risk scoring to prevent fraudulent transactions while maintaining a seamless user experience..
 
 Core Functionality
