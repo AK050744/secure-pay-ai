@@ -1,4 +1,4 @@
-# Secure-pay-ai
+# Secure-pay-AI(ONE PAY)
 Secure Pay AI is an advanced fraud detection system that combines machine learning, computer vision, and behavioral analysis to provide real-time transaction risk assessment for retail environments. Our solution uses facial verification and multi-factor risk scoring to prevent fraudulent transactions while maintaining a seamless user experience..
 
 Core Functionality
@@ -17,24 +17,7 @@ Sub-second Response Time: < 500ms transaction processing
 Scalable Architecture: FastAPI backend with async processing
 Cross-platform: Works on web, mobile, and desktop
 Privacy-first: No biometric data storage
- System Architecture
-┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
-│   Frontend      │    │   FastAPI       │    │   ML Engine     │
-│   (HTML/JS)     │◄──►│   Backend       │◄──►│   Risk Scoring  │
-│                 │    │                 │    │                 │
-│ • Face Capture  │    │ • Face Detection│    │ • Fraud Model   │
-│ • Form Input    │    │ • Data Validation│   │ • Pattern Recog │
-│ • Real-time UI  │    │ • Risk Analysis │    │ • Decision Tree │
-└─────────────────┘    └─────────────────┘    └─────────────────┘
-                              │
-                       ┌─────────────────┐
-                       │   OpenCV        │
-                       │   Face Engine   │
-                       │                 │
-                       │ • Haar Cascades │
-                       │ • Image Process │
-                       │ • Face Verify   │
-                       └─────────────────┘
+
 📊 Risk Scoring Algorithm
 Our proprietary algorithm analyzes multiple risk factors:
 FactorWeightDescriptionDevice Recognition25%Known vs unknown deviceLocation Change20%Geographical anomaliesPurchase Amount20%Amount-based risk assessmentAccount Age15%New account risk factorPurchase Time10%Time-of-day analysisSale Events5%Promotional period adjustmentsSession Duration3%User behavior patternsFace Verification2%Identity confirmation
